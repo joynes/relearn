@@ -13,7 +13,15 @@ import signal
 import sys
 import termios
 import tty
-from os.path import join, isfile
+from os.path import join, isfile, expanduser
+
+def savepath():
+  return join(expanduser('~'), '.learn')
+
+def savefile(lesson_file):
+  sfile = re.sub(r'(.*/)(.*).json', r'.\1\2_progress.json', lesson_file).replace('/', '_')
+  return join(savepath(), sfile)
+
 
 devider = '|'
 class bcolors:
@@ -24,17 +32,23 @@ class bcolors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
 
+def print_devider():
+  print '-----------------------'
+def print_title(title):
+  print_devider()
+  print title
+  print_devider()
 def print_green(string):
-    print '%s%s%s' % (bcolors.GREEN, string, bcolors.ENDC)
+  print '%s%s%s' % (bcolors.GREEN, string, bcolors.ENDC)
 
 def print_red(string):
-    print '%s%s%s' % (bcolors.RED, string, bcolors.ENDC)
+  print '%s%s%s' % (bcolors.RED, string, bcolors.ENDC)
 
 def print_bold(string):
-    print '%s%s%s' % (bcolors.BOLD, string, bcolors.ENDC)
+  print '%s%s%s' % (bcolors.BOLD, string, bcolors.ENDC)
 
 def clear():
-    os.system('clear')
+  os.system('clear')
 
 def getch():
     fd = sys.stdin.fileno()
@@ -42,6 +56,8 @@ def getch():
     try:
         tty.setraw(fd)
         ch = sys.stdin.read(1)
+        if ch == '\x03':
+          sys.exit(1)
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
     return ch
@@ -89,8 +105,6 @@ def handle_input(index, size):
       action = True
     elif input == 'q':
       quit = True
-    elif input == '\x03':
-      sys.exit(1)
     if index >= size:
       index = 0
     elif index < 0:
@@ -99,8 +113,6 @@ def handle_input(index, size):
 
 def question(word, dictionary, sec):
     
-    os.system('clear')
-    print 'English word for: %s' % word[1]
     alt = []
     for entry in dictionary:
         if entry[0] != word[0]:
@@ -110,6 +122,9 @@ def question(word, dictionary, sec):
     alt.append(word[0])
     random.shuffle(alt)
 
+    clear()
+    print 'Question: %s' % word[1]
+    print
     print devider + bcolors.BLUE + alt[0] + bcolors.ENDC + devider + '\t' + devider + bcolors.HEADER + alt[1] + bcolors.ENDC + devider + '\t' + devider + bcolors.RED + alt[2] + bcolors.ENDC + devider
     svar = nonBlockingRawInput('Your answer: ', sec)
     if svar == 'a':
@@ -118,21 +133,26 @@ def question(word, dictionary, sec):
         svar = alt[1]
     elif svar == 'd':
         svar = alt[2]
+    elif svar == 'q':
+      raise 'quit'
 
     if svar == word[0]:
         print_green('Correct!')
         answer = True
     else:
-        print_red('Wrong!')
+        print
+        print_red('Wrong! Should be: %s' % word[0])
         answer = False
     return answer
 
-def start_stage(stage_id, stage, dic):
-  choices = ['Practice', 'Practice revers']
+def start_stage(stage_id, stage, dic, lesson_file):
+  choices = ['Overview', 'Practice', 'Practice reverse']
   index = 0
   while True:
     os.system('clear')
+    print_devider()
     print "Stage: " + str(stage_id)
+    print_devider()
     i = 0
     for choice in choices:
       if i == index:
@@ -143,8 +163,16 @@ def start_stage(stage_id, stage, dic):
 
     (index, action, quit) = handle_input(index, len(choices))
     if action:
+      questions = dic[stage[0]:stage[1]]
       if (index == 0):
-        questions = dic[stage[0]:stage[1]]
+        clear()
+        print_title(choices[index])
+        for quest in questions:
+          print '%-8s %-10s' % (str(quest[0] + ':'), quest[1])
+        print
+        print 'Press any key to continue'
+        getch()
+      elif (index == 1):
 
         bigdict = []
         for i in range(0, 1):
@@ -154,14 +182,40 @@ def start_stage(stage_id, stage, dic):
 
         correct_answ = 0
         for word in bigdict:
-          if question(word, questions, 4000):
-              correct_answ += 1
-          raw_input('Press enter to try the next word')
-        print 'You scored %s/%s, percent %s' % (correct_answ, len(bigdict), float(correct_answ) / float(len(bigdict)))
+          try:
+            if question(word, questions, 4000):
+                correct_answ += 1
+          except:
+            return
+          print
+          print 'Press a button to continue'
+          getch()
+        os.system('clear')
+        print_devider()
+        print_bold('Result:')
+        print_devider()
+        print
+        percentage = int(100.0 * float(correct_answ) / float(len(bigdict)))
+        print 'Score: %s/%s (%s%%)' % (correct_answ, len(bigdict), percentage)
+# save result
+        progress = {}
+        if not progress.has_key(stage_id):
+          progress[stage_id] = {}
+        progress[stage_id][index] = percentage
+
+        fd = open(savefile(lesson_file), 'w')
+
+        fd.write(json.dumps(progress))
+        fd.flush()
+        fd.close()
+        getch()
     if quit:
       break
 
 def enter_lesson(lesson_file):
+  # load progress
+  fd = open(savefile(lesson_file), 'rw')
+  progress = json.loads(fd.read())
   clear()
   index = 0
   lesson = json.loads(open(lesson_file).read())
@@ -179,23 +233,36 @@ def enter_lesson(lesson_file):
       back -= 1
     
   if test:
-      start_stage(0, stages[0], dic)
+      start_stage(0, stages[0], dic, lesson_file)
   while True:
     os.system('clear')
     print 'Lesson: %s' % lesson_file
     for i in range(len(stages)):
-      text = "%d: %s - %s" % (i, dic[stages[i][0]][1], dic[stages[i][1] - 1][1]) 
+      prog = 0
+      try:
+        total = reduce(lambda x, y: x+y, progress[str(i)].values())
+        prog = int(float(33) / (100 * len(progress[str(i)].values())) * 100)
+      except:
+        pass
+      if prog > 25:
+        prog = bcolors.GREEN + str(prog) + '%' + bcolors.ENDC
+      else:
+        prog = bcolors.RED + str(prog) + '%' + bcolors.ENDC
+      text = "%-10.10s %-10.10s  %s" % (str(i) + ':', (dic[stages[i][0]][1] + ' -> ' + dic[stages[i][1] - 1][1]), prog) 
       if i == index:
         print_bold(text)
       else:
         print text
     (index, action, quit) = handle_input(index, len(stages))
     if action:
-      start_stage(i, stages[i], dic)
+      start_stage(index, stages[index], dic, lesson_file)
     if quit:
       break
 
 def main():
+  # create save path
+  if not os.path.exists(savepath()):
+    os.mkdir(savepath())
   index = 0
   data_path = 'lessons'
   lessons = [lesson for lesson in os.listdir(data_path) if isfile(join(data_path, lesson)) and lesson.endswith('.json')]
