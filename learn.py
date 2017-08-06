@@ -145,7 +145,7 @@ def question(word, dictionary, sec):
         answer = False
     return answer
 
-def start_stage(stage_id, stage, dic, lesson_file):
+def start_stage(stage_id, stage, dic, lesson_file, progress):
   choices = ['Overview', 'Practice', 'Practice reverse']
   index = 0
   while True:
@@ -155,10 +155,14 @@ def start_stage(stage_id, stage, dic, lesson_file):
     print_devider()
     i = 0
     for choice in choices:
+      prog = 0
+      if progress[str(stage_id)].has_key(str(i)):
+        prog = progress[str(stage_id)][str(i)]
+      text = '%s (%s%%)' % (choice, prog)
       if i == index:
-        print_bold(choice)
+        print_bold(text)
       else:
-        print choice
+        print text
       i = i+1
 
     (index, action, quit) = handle_input(index, len(choices))
@@ -168,7 +172,7 @@ def start_stage(stage_id, stage, dic, lesson_file):
         clear()
         print_title(choices[index])
         for quest in questions:
-          print '%-8s %-10s' % (str(quest[0] + ':'), quest[1])
+          print '%-8s %-10s %s' % (str(quest[0] + ':'), quest[1])
         print
         print 'Press any key to continue'
         getch()
@@ -197,28 +201,29 @@ def start_stage(stage_id, stage, dic, lesson_file):
         print
         percentage = int(100.0 * float(correct_answ) / float(len(bigdict)))
         print 'Score: %s/%s (%s%%)' % (correct_answ, len(bigdict), percentage)
-# save result
-        progress = {}
-        if not progress.has_key(stage_id):
-          progress[stage_id] = {}
-        progress[stage_id][index] = percentage
+        if not progress[str(stage_id)].has_key(str(index)):
+          progress[str(stage_id)][str(index)] = 0
+        if progress[str(stage_id)][str(index)] < percentage:
+          progress[str(stage_id)][str(index)] = percentage
 
-        fd = open(savefile(lesson_file), 'w')
-
-        fd.write(json.dumps(progress))
-        fd.flush()
-        fd.close()
+        with open(savefile(lesson_file), 'w+') as fd:
+          fd.write(json.dumps(progress))
+          fd.flush()
         getch()
     if quit:
       break
 
 def enter_lesson(lesson_file):
   # load progress
-  fd = open(savefile(lesson_file), 'rw')
-  progress = json.loads(fd.read())
+  try:
+    with open(savefile(lesson_file), 'r') as fd:
+        progress = json.loads(fd.read())
+  except IOError:
+    progress = {}
   clear()
   index = 0
-  lesson = json.loads(open(lesson_file).read())
+  with open(lesson_file) as fdlesson:
+    lesson = json.loads(fdlesson.read())
   dic = lesson["words"]
   lesson_size = 6
   multiplier = 5
@@ -244,7 +249,7 @@ def enter_lesson(lesson_file):
         prog = int(float(33) / (100 * len(progress[str(i)].values())) * 100)
       except:
         pass
-      if prog > 25:
+      if prog > 70:
         prog = bcolors.GREEN + str(prog) + '%' + bcolors.ENDC
       else:
         prog = bcolors.RED + str(prog) + '%' + bcolors.ENDC
@@ -255,7 +260,10 @@ def enter_lesson(lesson_file):
         print text
     (index, action, quit) = handle_input(index, len(stages))
     if action:
-      start_stage(index, stages[index], dic, lesson_file)
+      if not progress.has_key(str(index)):
+        progress[str(index)] = {}
+
+      stage_progress = start_stage(index, stages[index], dic, lesson_file, progress)
     if quit:
       break
 
