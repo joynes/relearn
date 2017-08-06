@@ -15,6 +15,9 @@ import termios
 import tty
 from os.path import join, isfile, expanduser
 
+def play_sound(fil):
+    os.system('afplay data/' + fil + '.m4a')
+
 def savepath():
   return join(expanduser('~'), '.learn')
 
@@ -179,7 +182,7 @@ def start_stage(stage_id, stage, dic, lesson_file, progress):
       elif (index == 1):
 
         bigdict = []
-        for i in range(0, 1):
+        for i in range(0, 5):
           iteration = list(questions)
           random.shuffle(questions)
           bigdict += iteration
@@ -188,8 +191,9 @@ def start_stage(stage_id, stage, dic, lesson_file, progress):
         for word in bigdict:
           try:
             if question(word, questions, 4000):
-                correct_answ += 1
-          except:
+              correct_answ += 1
+            play_sound(word[0])
+          except 'quit':
             return
           print
           print 'Press a button to continue'
