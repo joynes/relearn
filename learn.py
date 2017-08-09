@@ -137,7 +137,7 @@ def question(word, dictionary, sec):
     elif svar == 'd':
         svar = alt[2]
     elif svar == 'q':
-      raise 'quit'
+      raise Exception('quit')
 
     if svar == word[0]:
         print_green('Correct!')
@@ -148,8 +148,73 @@ def question(word, dictionary, sec):
         answer = False
     return answer
 
+def start_guess(bigdict, questions, time):
+  correct_answ = 0
+  for word in bigdict:
+    try:
+      if question(word, questions, time):
+        correct_answ += 1
+      play_sound(word[0])
+    except:
+      return 0
+    print
+    print 'Press a button to continue'
+    getch()
+
+  os.system('clear')
+  print_devider()
+  print_bold('Result:')
+  print_devider()
+  print
+  percentage = int(100.0 * float(correct_answ) / float(len(bigdict)))
+  print 'Score: %s/%s (%s%%)' % (correct_answ, len(bigdict), percentage)
+  return percentage
+
+def start_sub_stage(index, questions, stage_id, progress, lesson_file, stage_name):
+  choices = ['Training', '10 sec', '5 sec', 'Exam (2 sec)']
+
+  bigdict = []
+  for i in range(0, 1):
+    iteration = list(questions)
+    random.shuffle(questions)
+    bigdict += iteration
+
+  while True:
+    os.system('clear')
+    print_devider()
+    print stage_name
+    print_devider()
+    i = 0
+    for choice in choices:
+      if i == index:
+        print_bold(choice)
+      else:
+        print choice
+      i = i + 1
+    (index, action, quit) = handle_input(index, len(choices))
+    percentage = 0
+    if action:
+      if index == 0:
+        start_guess(bigdict, questions, 4000)
+      elif index == 1:
+        start_guess(bigdict, questions, 2)
+      break
+    if quit:
+      break
+
+  if not progress[str(stage_id)].has_key(str(index)):
+    progress[str(stage_id)][str(index)] = 0
+  if progress[str(stage_id)][str(index)] < percentage:
+    progress[str(stage_id)][str(index)] = percentage
+
+  with open(savefile(lesson_file), 'w+') as fd:
+    fd.write(json.dumps(progress))
+    fd.flush()
+  getch()
+  return progress
+
 def start_stage(stage_id, stage, dic, lesson_file, progress):
-  choices = ['Overview', 'Practice', 'Practice reverse']
+  choices = ['Overview', 'Guess', 'Guess reverse', 'Write', 'Listen and Guess', 'Listen and Write']
   index = 0
   while True:
     os.system('clear')
@@ -158,10 +223,13 @@ def start_stage(stage_id, stage, dic, lesson_file, progress):
     print_devider()
     i = 0
     for choice in choices:
-      prog = 0
-      if progress[str(stage_id)].has_key(str(i)):
-        prog = progress[str(stage_id)][str(i)]
-      text = '%s (%s%%)' % (choice, prog)
+      prog = ''
+      if not progress[str(stage_id)].has_key(str(i)):
+        progress[str(stage_id)][str(i)] = 0
+      if i != 0:
+        prog = '(%s%%)' % progress[str(stage_id)][str(i)]
+
+      text = '%s %s' % (choice, prog)
       if i == index:
         print_bold(text)
       else:
@@ -175,45 +243,13 @@ def start_stage(stage_id, stage, dic, lesson_file, progress):
         clear()
         print_title(choices[index])
         for quest in questions:
-          print '%-8s %-10s %s' % (str(quest[0] + ':'), quest[1])
+          print '%-8s %-10s' % (str(quest[0] + ':'), quest[1])
         print
         print 'Press any key to continue'
         getch()
-      elif (index == 1):
+      else:
+        progress = start_sub_stage(index, questions, stage_id, progress, lesson_file, choices[index])
 
-        bigdict = []
-        for i in range(0, 5):
-          iteration = list(questions)
-          random.shuffle(questions)
-          bigdict += iteration
-
-        correct_answ = 0
-        for word in bigdict:
-          try:
-            if question(word, questions, 4000):
-              correct_answ += 1
-            play_sound(word[0])
-          except 'quit':
-            return
-          print
-          print 'Press a button to continue'
-          getch()
-        os.system('clear')
-        print_devider()
-        print_bold('Result:')
-        print_devider()
-        print
-        percentage = int(100.0 * float(correct_answ) / float(len(bigdict)))
-        print 'Score: %s/%s (%s%%)' % (correct_answ, len(bigdict), percentage)
-        if not progress[str(stage_id)].has_key(str(index)):
-          progress[str(stage_id)][str(index)] = 0
-        if progress[str(stage_id)][str(index)] < percentage:
-          progress[str(stage_id)][str(index)] = percentage
-
-        with open(savefile(lesson_file), 'w+') as fd:
-          fd.write(json.dumps(progress))
-          fd.flush()
-        getch()
     if quit:
       break
 
@@ -250,7 +286,7 @@ def enter_lesson(lesson_file):
       prog = 0
       try:
         total = reduce(lambda x, y: x+y, progress[str(i)].values())
-        prog = int(float(33) / (100 * len(progress[str(i)].values())) * 100)
+        prog = int(float(total) / (100 * len(progress[str(i)].values())) * 100)
       except:
         pass
       if prog > 70:
