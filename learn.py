@@ -4,6 +4,7 @@
 ''' Learn anything anywhere! '''
 
 test = False
+ITERATIONS = 1
 
 import json
 import os
@@ -170,15 +171,17 @@ def start_guess(bigdict, questions, time):
   print 'Score: %s/%s (%s%%)' % (correct_answ, len(bigdict), percentage)
   return percentage
 
-def start_sub_stage(index, questions, stage_id, progress, lesson_file, stage_name):
-  choices = ['Training', '10 sec', '5 sec', 'Exam (2 sec)']
+def start_sub_stage(questions, stage_name):
+  times = [60, 10, 6, 3]
+  choices = ['Training', 'Practice', 'Practice', 'Exam']
 
   bigdict = []
-  for i in range(0, 1):
+  for i in range(0, ITERATIONS):
     iteration = list(questions)
     random.shuffle(questions)
     bigdict += iteration
 
+  index = 0
   while True:
     os.system('clear')
     print_devider()
@@ -186,32 +189,23 @@ def start_sub_stage(index, questions, stage_id, progress, lesson_file, stage_nam
     print_devider()
     i = 0
     for choice in choices:
+      text = '%s (%s sec)' % (choice, str(times[i]))
       if i == index:
-        print_bold(choice)
+        print_bold(text)
       else:
-        print choice
+        print text
       i = i + 1
     (index, action, quit) = handle_input(index, len(choices))
-    percentage = 0
     if action:
-      if index == 0:
-        start_guess(bigdict, questions, 4000)
-      elif index == 1:
-        start_guess(bigdict, questions, 2)
+      percentage = start_guess(bigdict, questions, times[index])
+        # only set percentage if its the exam
+      if index != len(choices) - 1:
+        percentage = 0
       break
     if quit:
-      break
+      return 0
 
-  if not progress[str(stage_id)].has_key(str(index)):
-    progress[str(stage_id)][str(index)] = 0
-  if progress[str(stage_id)][str(index)] < percentage:
-    progress[str(stage_id)][str(index)] = percentage
-
-  with open(savefile(lesson_file), 'w+') as fd:
-    fd.write(json.dumps(progress))
-    fd.flush()
-  getch()
-  return progress
+  return percentage
 
 def start_stage(stage_id, stage, dic, lesson_file, progress):
   choices = ['Overview', 'Guess', 'Guess reverse', 'Write', 'Listen and Guess', 'Listen and Write']
@@ -248,7 +242,17 @@ def start_stage(stage_id, stage, dic, lesson_file, progress):
         print 'Press any key to continue'
         getch()
       else:
-        progress = start_sub_stage(index, questions, stage_id, progress, lesson_file, choices[index])
+        percentage = start_sub_stage(questions, choices[index])
+
+        if not progress[str(stage_id)].has_key(str(index)):
+          progress[str(stage_id)][str(index)] = 0
+        if progress[str(stage_id)][str(index)] < percentage:
+          progress[str(stage_id)][str(index)] = percentage
+
+        with open(savefile(lesson_file), 'w+') as fd:
+          fd.write(json.dumps(progress))
+          fd.flush()
+        getch()
 
     if quit:
       break
