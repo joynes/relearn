@@ -17,7 +17,14 @@ import tty
 from os.path import join, isfile, expanduser
 
 def play_sound(fil):
-    os.system('afplay data/' + fil + '.m4a')
+  try:
+    os.system('afplay data/' + fil[0] + '.m4a')
+  except:
+    # try play the answaer
+    try:
+      os.system('afplay data/' + fil[1] + '.m4a')
+    except:
+      pass
 
 def savepath():
   return join(expanduser('~'), '.learn')
@@ -155,7 +162,7 @@ def start_guess(bigdict, questions, time):
     try:
       if question(word, questions, time):
         correct_answ += 1
-      play_sound(word[0])
+      play_sound(word)
     except:
       return 0
     print
@@ -172,8 +179,11 @@ def start_guess(bigdict, questions, time):
   return percentage
 
 def start_sub_stage(questions, stage_name):
-  times = [60, 10, 6, 3]
+  times = [60, 10, 6, 4]
   choices = ['Training', 'Practice', 'Practice', 'Exam']
+
+  if stage_name == 'Guess reverse':
+    questions = [ [i[1],i[0]] for i in questions]
 
   bigdict = []
   for i in range(0, ITERATIONS):
@@ -201,7 +211,6 @@ def start_sub_stage(questions, stage_name):
         # only set percentage if its the exam
       if index != len(choices) - 1:
         percentage = 0
-      break
     if quit:
       return 0
 
@@ -252,7 +261,6 @@ def start_stage(stage_id, stage, dic, lesson_file, progress):
         with open(savefile(lesson_file), 'w+') as fd:
           fd.write(json.dumps(progress))
           fd.flush()
-        getch()
 
     if quit:
       break
