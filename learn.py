@@ -195,12 +195,6 @@ def start_sub_stage(questions, stage_name):
   if stage_name == 'Guess reverse':
     questions = [ [i[1],i[0]] for i in questions]
 
-  bigdict = []
-  for i in range(0, ITERATIONS):
-    iteration = list(questions)
-    random.shuffle(questions)
-    bigdict += iteration
-
   index = 0
   while True:
     os.system('clear')
@@ -217,6 +211,12 @@ def start_sub_stage(questions, stage_name):
       i = i + 1
     (index, action, quit) = handle_input(index, len(choices))
     if action:
+      bigdict = []
+      for i in range(0, ITERATIONS):
+        iteration = list(questions)
+        random.shuffle(iteration)
+        bigdict += iteration
+
       percentage = start_guess(bigdict, questions, times[index])
         # only set percentage if its the exam
       if index != len(choices) - 1:
