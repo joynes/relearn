@@ -122,6 +122,9 @@ def handle_input(index, size):
       index = size - 1
     return (index, action, quit)
 
+def is_arabic(word):
+    return ord(word[0]) > 0x600 and ord(word[0]) < 0x6FF
+
 def question(word, dictionary, sec):
     
     alt = []
@@ -137,15 +140,22 @@ def question(word, dictionary, sec):
     print 'Question: %s' % word[1]
     print
     print devider + bcolors.BLUE + alt[0] + bcolors.ENDC + devider + '\t' + devider + bcolors.HEADER + alt[1] + bcolors.ENDC + devider + '\t' + devider + bcolors.RED + alt[2] + bcolors.ENDC + devider
-    svar = nonBlockingRawInput('Your answer: ', sec)
-    if svar == 'a':
+    inp = nonBlockingRawInput('Your answer: ', sec)
+    if inp == 'a':
         svar = alt[0]
-    elif svar == 's':
+    elif inp == 's':
         svar = alt[1]
-    elif svar == 'd':
+    elif inp == 'd':
         svar = alt[2]
-    elif svar == 'q':
+    elif inp == 'q':
       raise Exception('quit')
+
+    if is_arabic(alt[0]):
+      print 'is arabic'
+      if inp == 'a':
+        svar = alt[2]
+      elif inp == 'd':
+        svar = alt[0]
 
     if svar == word[0]:
         print_green('Correct!')
