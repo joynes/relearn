@@ -186,6 +186,7 @@ def start_guess(bigdict, questions, time):
   print
   percentage = int(100.0 * float(correct_answ) / float(len(bigdict)))
   print 'Score: %s/%s (%s%%)' % (correct_answ, len(bigdict), percentage)
+  getch()
   return percentage
 
 def start_sub_stage(questions, stage_name):
@@ -221,6 +222,8 @@ def start_sub_stage(questions, stage_name):
         # only set percentage if its the exam
       if index != len(choices) - 1:
         percentage = 0
+      else:
+        return percentage
     if quit:
       return 0
 
@@ -237,7 +240,7 @@ def start_stage(stage_id, stage, dic, lesson_file, progress):
     i = 0
     for choice in choices:
       prog = ''
-      if not progress[str(stage_id)].has_key(str(i)):
+      if i != 0 and not progress[str(stage_id)].has_key(str(i)):
         progress[str(stage_id)][str(i)] = 0
       if i != 0:
         prog = '(%s%%)' % progress[str(stage_id)][str(i)]
@@ -275,6 +278,8 @@ def start_stage(stage_id, stage, dic, lesson_file, progress):
     if quit:
       break
 
+def unlock_points(stage_id):
+  return (stage_id - 3) * 100
 def enter_lesson(lesson_file):
   # load progress
   try:
@@ -304,28 +309,42 @@ def enter_lesson(lesson_file):
   while True:
     os.system('clear')
     print 'Lesson: %s' % lesson_file
+    total = 0
     for i in range(len(stages)):
       prog = 0
       try:
-        total = reduce(lambda x, y: x+y, progress[str(i)].values())
-        prog = int(float(total) / (100 * len(progress[str(i)].values())) * 100)
+        stage_total = reduce(lambda x, y: x+y, progress[str(i)].values())
+        prog = int(float(stage_total) / (100 * len(progress[str(i)].values())) * 100)
+        total += prog
       except:
         pass
-      if prog > 70:
+      if prog > 85:
         prog = bcolors.GREEN + str(prog) + '%' + bcolors.ENDC
+      elif prog > 50:
+        prog = bcolors.BLUE + str(prog) + '%' + bcolors.ENDC
       else:
         prog = bcolors.RED + str(prog) + '%' + bcolors.ENDC
-      text = "%-10.10s %-10.10s  %s" % (str(i) + ':', (dic[stages[i][0]][1] + ' -> ' + dic[stages[i][1] - 1][1]), prog) 
+      if total >= unlock_points(i):
+        text = "%-10.10s %-10.10s  %s" % (str(i) + ':', (dic[stages[i][0]][1] + ' -> ' + dic[stages[i][1] - 1][1]), prog) 
+      else:
+        text = "%-10.10s %-10.10s (%s points needed)" % (str(i) + ':', 'Locked!', (unlock_points(i) - total))
       if i == index:
         print_bold(text)
       else:
         print text
+    print_devider()
+    print_bold('Total: %s points' % total)
+    print_devider()
     (index, action, quit) = handle_input(index, len(stages))
     if action:
-      if not progress.has_key(str(index)):
-        progress[str(index)] = {}
+      if total >= unlock_points(index):
+        if not progress.has_key(str(index)):
+          progress[str(index)] = {}
 
-      stage_progress = start_stage(index, stages[index], dic, lesson_file, progress)
+        stage_progress = start_stage(index, stages[index], dic, lesson_file, progress)
+      else:
+        print_red('STAGE IS LOCKED')
+        getch()
     if quit:
       break
 
