@@ -4,7 +4,7 @@
 ''' Learn anything anywhere! '''
 
 test = False
-ITERATIONS = 1
+ITERATIONS = 4
 
 import json
 import os
@@ -279,7 +279,7 @@ def start_stage(stage_id, stage, dic, lesson_file, progress):
       break
 
 def unlock_points(stage_id):
-  return (stage_id - 3) * 100
+  return (stage_id - 2) * 100
 def enter_lesson(lesson_file):
   # load progress
   try:
@@ -325,7 +325,10 @@ def enter_lesson(lesson_file):
       else:
         prog = bcolors.RED + str(prog) + '%' + bcolors.ENDC
       if total >= unlock_points(i):
-        text = "%-10.10s %-10.10s  %s" % (str(i) + ':', (dic[stages[i][0]][1] + ' -> ' + dic[stages[i][1] - 1][1]), prog) 
+        if is_arabic(dic[stages[i][0]][1]):
+          text = "%-5s %s %-10.20s " % (str(i) + ':', prog, (dic[stages[i][1] - 1][1] + ' <- ' + dic[stages[i][0] ][1]))
+        else:
+          text = "%-10.10s %-10.20s  %s" % (str(i) + ':', (dic[stages[i][0]][1] + ' -> ' + dic[stages[i][1] - 1][1]), prog)
       else:
         text = "%-10.10s %-10.10s (%s points needed)" % (str(i) + ':', 'Locked!', (unlock_points(i) - total))
       if i == index:
