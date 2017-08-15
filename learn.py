@@ -189,6 +189,43 @@ def start_guess(bigdict, questions, time):
   getch()
   return percentage
 
+def start_write(questions):
+  #raw_input('Change to arabic keyboard and press enter!')
+  bigdict = []
+  for i in range(0, 1):
+    iteration = list(questions)
+    random.shuffle(iteration)
+    bigdict += iteration
+
+  correct_answ = 0
+  for question in bigdict:
+    clear()
+    print_devider()
+    print 'Write The Correct Answer'
+    print_devider()
+    os.system('./data/imgcat ./data/arabic_keyboard.png')
+    print 'Question (write answer): ' + question[0]
+    text = raw_input('-> ')
+    if text == 'q':
+      return 0
+    elif text == question[1]:
+      print_green('Correct answer!')
+      correct_answ += 1
+    else:
+      print_red('Wrong! Should be: %s' % question[1])
+    raw_input('Press enter to continue')
+  clear()
+  print_devider()
+  os.system('clear')
+  print_devider()
+  print_bold('Result:')
+  print_devider()
+  print
+  percentage = int(100.0 * float(correct_answ) / float(len(bigdict)))
+  print 'Score: %s/%s (%s%%)' % (correct_answ, len(bigdict), percentage)
+  getch()
+  return percentage
+
 def start_sub_stage(questions, stage_name):
   times = [60, 10, 6, 4]
   choices = ['Training', 'Practice', 'Practice', 'Exam']
@@ -264,7 +301,11 @@ def start_stage(stage_id, stage, dic, lesson_file, progress):
         print 'Press any key to continue'
         getch()
       else:
-        percentage = start_sub_stage(questions, choices[index])
+
+        if choices[index] == 'Write':
+          percentage = start_write(questions)
+        else:
+          percentage = start_sub_stage(questions, choices[index])
 
         if not progress[str(stage_id)].has_key(str(index)):
           progress[str(stage_id)][str(index)] = 0
@@ -280,6 +321,7 @@ def start_stage(stage_id, stage, dic, lesson_file, progress):
 
 def unlock_points(stage_id):
   return (stage_id - 2) * 100
+
 def enter_lesson(lesson_file):
   # load progress
   try:
