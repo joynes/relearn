@@ -4,7 +4,8 @@
 ''' Learn anything anywhere! '''
 
 test = False
-ITERATIONS = 4
+ITERATIONS = 3
+WRITE_ITERATIONS = 1
 
 import json
 import os
@@ -77,6 +78,19 @@ class AlarmException(Exception):
 
 def alarmHandler(signum, frame):
     raise AlarmException
+
+def raw_input_timed(prompt='', timeout=100000):
+    signal.signal(signal.SIGALRM, alarmHandler)
+    signal.alarm(timeout)
+    try:
+        text = raw_input(prompt)
+        signal.alarm(0)
+        return text
+    except AlarmException:
+        pass
+    signal.signal(signal.SIGALRM, signal.SIG_IGN)
+    return '0'
+
 def nonBlockingRawInput(prompt='', timeout=100000):
     signal.signal(signal.SIGALRM, alarmHandler)
     signal.alarm(timeout)
@@ -189,26 +203,78 @@ def start_guess(bigdict, questions, time):
   getch()
   return percentage
 
-def start_write(questions):
-  #raw_input('Change to arabic keyboard and press enter!')
-  bigdict = []
-  for i in range(0, 1):
-    iteration = list(questions)
-    random.shuffle(iteration)
-    bigdict += iteration
+def start_sub_stage_write(questions, stage_name):
+  times = [10000, 4, 10, 4]
+  choices = ['Training', 'Training', 'Exam', 'Exam']
 
+  if stage_name == 'Write reverse':
+    questions = [ [i[1],i[0]] for i in questions]
+
+  index = 0
+  while True:
+    os.system('clear')
+    print_devider()
+    print stage_name
+    print_devider()
+    i = 0
+    for choice in choices:
+      text = '%s (%s sec)' % (choice, str(times[i]))
+      if i == index:
+        print_bold(text)
+      else:
+        print text
+      i = i + 1
+    (index, action, quit) = handle_input(index, len(choices))
+    if action:
+
+      if is_arabic(questions[0][1]):
+        clear()
+        raw_input('Change to arabic keyboard and press enter!')
+
+      bigdict = []
+      for i in range(0, WRITE_ITERATIONS):
+        iteration = list(questions)
+        random.shuffle(iteration)
+        bigdict += iteration
+
+      percentage = start_write(bigdict, times[index], index)
+        # only set percentage if its the exam
+      if index != len(choices) - 1:
+        percentage = 0
+      else:
+        return percentage
+    if quit:
+      return 0
+
+  return percentage
+
+def start_write(bigdict, time, index):
   correct_answ = 0
   for question in bigdict:
     clear()
     print_devider()
     print 'Write The Correct Answer'
     print_devider()
-    os.system('./data/imgcat ./data/arabic_keyboard.png')
-    print 'Question (write answer): ' + question[0]
-    text = raw_input('-> ')
+    if is_arabic(question[1]):
+      print 'Choose Arabic keyboard!!!'
+      print 'LAYOUT:'
+      print
+      print 'q=ق  w=ش  e=ع  r=ر  t=ت  y=ط  u=و  i=ي  o=ه  p=ة  å=ث  å=ظ'
+      print '   a=ا  s=س  d=د  f=ف  g=غ  h=ح  j=ج  k=ك  l=ل' 
+      print '     z=ز  x=خ  c=ص  v=ذ  b=ب  n=ن  m=م'
+      print
+      print 'vocals: alt-a = a   alt-u = u   alt-i = i    alt-o = o' 
+      print 'variants: shift-i = ـى (ā / á / ỳ)    shift-o = ـة (t / h / ẗ)'
+      print 'hamza (ء): * = أ  alt-1 = إ'
+      print_devider()
+    if index in [0,1]:
+      print 'Question %s = %s, write %s below: ' % (question[0], question[1], bcolors.GREEN + question[1] + bcolors.ENDC)
+    else:
+      print 'Question (write answer): ' + question[0]
+    text = raw_input_timed('-> ', time)
     if text == 'q':
       return 0
-    elif text == question[1]:
+    elif text == question[1].encode('utf-8') :
       print_green('Correct answer!')
       correct_answ += 1
     else:
@@ -224,6 +290,8 @@ def start_write(questions):
   percentage = int(100.0 * float(correct_answ) / float(len(bigdict)))
   print 'Score: %s/%s (%s%%)' % (correct_answ, len(bigdict), percentage)
   getch()
+  if is_arabic(questions[0][1]):
+    raw_input('Change to NON arabic keyboard and press enter!')
   return percentage
 
 def start_sub_stage(questions, stage_name):
@@ -267,7 +335,7 @@ def start_sub_stage(questions, stage_name):
   return percentage
 
 def start_stage(stage_id, stage, dic, lesson_file, progress):
-  choices = ['Overview', 'Guess', 'Guess reverse', 'Write', 'Listen and Guess', 'Listen and Write']
+  choices = ['Overview', 'Guess', 'Guess reverse', 'Write', 'Write reverse', 'Listen and Guess', 'Listen and Write']
   index = 0
   while True:
     os.system('clear')
@@ -302,8 +370,8 @@ def start_stage(stage_id, stage, dic, lesson_file, progress):
         getch()
       else:
 
-        if choices[index] == 'Write':
-          percentage = start_write(questions)
+        if index in [3,4]:
+          percentage = start_sub_stage_write(questions, choices[index])
         else:
           percentage = start_sub_stage(questions, choices[index])
 
