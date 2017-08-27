@@ -348,12 +348,14 @@ def start_stage(stage_id, stage, dic, lesson_file, progress, exercises):
     i = 0
     for choice in choices:
       prog = ''
+      locked = ''
       if i != 0 and not progress[str(stage_id)].has_key(str(i)):
         progress[str(stage_id)][str(i)] = 0
       if i != 0:
         prog = '(%s%%)' % progress[str(stage_id)][str(i)]
-
-      text = '%s %s' % (choice, prog)
+      if i >= 2:
+        locked = "Locked" if progress[str(stage_id)][str(i-1)] < 85 else ""
+      text = '%s %s %s' % (choice, prog, locked)
       if i == index:
         print_bold(text)
       else:
@@ -372,19 +374,23 @@ def start_stage(stage_id, stage, dic, lesson_file, progress, exercises):
         print 'Press any key to continue'
         getch()
       else:
-        if 'Write' in choices[index]:
-          percentage = start_sub_stage_write(questions, exercises[index-1])
+        if index < 2 or progress[str(stage_id)][str(index-1)] > 85:
+          if 'Write' in choices[index]:
+            percentage = start_sub_stage_write(questions, exercises[index-1])
+          else:
+            percentage = start_sub_stage(questions, exercises[index-1])
+
+          if not progress[str(stage_id)].has_key(str(index)):
+            progress[str(stage_id)][str(index)] = 0
+          if progress[str(stage_id)][str(index)] < percentage:
+            progress[str(stage_id)][str(index)] = percentage
+
+          with open(savefile(lesson_file), 'w+') as fd:
+            fd.write(json.dumps(progress))
+            fd.flush()
         else:
-          percentage = start_sub_stage(questions, exercises[index-1])
-
-        if not progress[str(stage_id)].has_key(str(index)):
-          progress[str(stage_id)][str(index)] = 0
-        if progress[str(stage_id)][str(index)] < percentage:
-          progress[str(stage_id)][str(index)] = percentage
-
-        with open(savefile(lesson_file), 'w+') as fd:
-          fd.write(json.dumps(progress))
-          fd.flush()
+          print 'LOCKED'
+          getch()
 
     if quit:
       break
