@@ -6,6 +6,8 @@
 test = False
 ITERATIONS = 3
 WRITE_ITERATIONS = 1
+ITERATION_INDEX = 1
+TIME_INDEX = 2
 
 import json
 import os
@@ -155,6 +157,7 @@ def question(word, dictionary, sec):
     print
     print devider + bcolors.BLUE + alt[0] + bcolors.ENDC + devider + '\t' + devider + bcolors.HEADER + alt[1] + bcolors.ENDC + devider + '\t' + devider + bcolors.RED + alt[2] + bcolors.ENDC + devider
     inp = nonBlockingRawInput('Your answer: ', sec)
+    svar = ''
     if inp == 'a':
         svar = alt[0]
     elif inp == 's':
@@ -203,9 +206,9 @@ def start_guess(bigdict, questions, time):
   getch()
   return percentage
 
-def start_sub_stage_write(questions, stage_name):
-  times = [10000, 4, 10, 4]
-  choices = ['Training', 'Training', 'Exam', 'Exam']
+def start_sub_stage_write(questions, exercises):
+  stage_name = exercises[0]
+  choices = [i[0] for i in exercises[1]]
 
   if stage_name == 'Write reverse':
     questions = [ [i[1],i[0]] for i in questions]
@@ -218,7 +221,7 @@ def start_sub_stage_write(questions, stage_name):
     print_devider()
     i = 0
     for choice in choices:
-      text = '%s (%s sec)' % (choice, str(times[i]))
+      text = '%s (%s sec)' % (choice, str(exercises[1][i][TIME_INDEX]))
       if i == index:
         print_bold(text)
       else:
@@ -232,12 +235,12 @@ def start_sub_stage_write(questions, stage_name):
         raw_input('Change to arabic keyboard and press enter!')
 
       bigdict = []
-      for i in range(0, WRITE_ITERATIONS):
+      for i in range(0, exercises[1][index][ITERATION_INDEX]):
         iteration = list(questions)
         random.shuffle(iteration)
         bigdict += iteration
 
-      percentage = start_write(bigdict, times[index], index)
+      percentage = start_write(bigdict, exercises[1][index][TIME_INDEX], index, "Training" in choices[index] )
         # only set percentage if its the exam
       if index != len(choices) - 1:
         percentage = 0
@@ -248,7 +251,7 @@ def start_sub_stage_write(questions, stage_name):
 
   return percentage
 
-def start_write(bigdict, time, index):
+def start_write(bigdict, time, index, print_answer):
   correct_answ = 0
   for question in bigdict:
     clear()
@@ -267,7 +270,7 @@ def start_write(bigdict, time, index):
       print 'variants: shift-i = ـى (ā / á / ỳ)    shift-o = ـة (t / h / ẗ)'
       print 'hamza (ء): * = أ  alt-1 = إ'
       print_devider()
-    if index in [0,1]:
+    if print_answer:
       print 'Question %s = %s, write %s below: ' % (question[0], question[1], bcolors.GREEN + question[1] + bcolors.ENDC)
     else:
       print 'Question (write answer): ' + question[0]
@@ -290,13 +293,13 @@ def start_write(bigdict, time, index):
   percentage = int(100.0 * float(correct_answ) / float(len(bigdict)))
   print 'Score: %s/%s (%s%%)' % (correct_answ, len(bigdict), percentage)
   getch()
-  if is_arabic(questions[0][1]):
+  if is_arabic(bigdict[0][1]):
     raw_input('Change to NON arabic keyboard and press enter!')
   return percentage
 
-def start_sub_stage(questions, stage_name):
-  times = [60, 10, 6, 4]
-  choices = ['Training', 'Practice', 'Practice', 'Exam']
+def start_sub_stage(questions, exercises):
+  stage_name = exercises[0]
+  choices = [i[0] for i in exercises[1]]
 
   if stage_name == 'Guess reverse':
     questions = [ [i[1],i[0]] for i in questions]
@@ -309,7 +312,7 @@ def start_sub_stage(questions, stage_name):
     print_devider()
     i = 0
     for choice in choices:
-      text = '%s (%s sec)' % (choice, str(times[i]))
+      text = '%s (%s sec)' % (choice, str(exercises[1][i][TIME_INDEX]))
       if i == index:
         print_bold(text)
       else:
@@ -318,12 +321,12 @@ def start_sub_stage(questions, stage_name):
     (index, action, quit) = handle_input(index, len(choices))
     if action:
       bigdict = []
-      for i in range(0, ITERATIONS):
+      for i in range(0, exercises[1][index][ITERATION_INDEX]):
         iteration = list(questions)
         random.shuffle(iteration)
         bigdict += iteration
 
-      percentage = start_guess(bigdict, questions, times[index])
+      percentage = start_guess(bigdict, questions, exercises[1][index][TIME_INDEX])
         # only set percentage if its the exam
       if index != len(choices) - 1:
         percentage = 0
@@ -334,8 +337,8 @@ def start_sub_stage(questions, stage_name):
 
   return percentage
 
-def start_stage(stage_id, stage, dic, lesson_file, progress):
-  choices = ['Overview', 'Guess', 'Guess reverse', 'Write', 'Write reverse', 'Listen and Guess', 'Listen and Write']
+def start_stage(stage_id, stage, dic, lesson_file, progress, exercises):
+  choices = ['Overview'] + [name[0] for name in exercises]
   index = 0
   while True:
     os.system('clear')
@@ -364,16 +367,15 @@ def start_stage(stage_id, stage, dic, lesson_file, progress):
         clear()
         print_title(choices[index])
         for quest in questions:
-          print '%-8s %-10s' % (str(quest[0] + ':'), quest[1])
+          print '%-8s %-10s' % ((quest[0] + ':'), quest[1])
         print
         print 'Press any key to continue'
         getch()
       else:
-
-        if index in [3,4]:
-          percentage = start_sub_stage_write(questions, choices[index])
+        if 'Write' in choices[index]:
+          percentage = start_sub_stage_write(questions, exercises[index-1])
         else:
-          percentage = start_sub_stage(questions, choices[index])
+          percentage = start_sub_stage(questions, exercises[index-1])
 
         if not progress[str(stage_id)].has_key(str(index)):
           progress[str(stage_id)][str(index)] = 0
@@ -388,7 +390,7 @@ def start_stage(stage_id, stage, dic, lesson_file, progress):
       break
 
 def unlock_points(stage_id):
-  return (stage_id - 2) * 100
+  return (stage_id - 0) * 85
 
 def enter_lesson(lesson_file):
   # load progress
@@ -402,6 +404,7 @@ def enter_lesson(lesson_file):
   with open(lesson_file) as fdlesson:
     lesson = json.loads(fdlesson.read())
   dic = lesson["words"]
+  exercises = lesson["exercises"]
   lesson_size = 6
   multiplier = 5
   stages = []
@@ -415,7 +418,7 @@ def enter_lesson(lesson_file):
       back -= 1
     
   if test:
-      start_stage(0, stages[0], dic, lesson_file)
+      start_stage(0, stages[0], dic, lesson_file, exercises)
   while True:
     os.system('clear')
     print 'Lesson: %s' % lesson_file
@@ -454,7 +457,7 @@ def enter_lesson(lesson_file):
         if not progress.has_key(str(index)):
           progress[str(index)] = {}
 
-        stage_progress = start_stage(index, stages[index], dic, lesson_file, progress)
+        stage_progress = start_stage(index, stages[index], dic, lesson_file, progress, exercises)
       else:
         print_red('STAGE IS LOCKED')
         getch()
