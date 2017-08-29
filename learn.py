@@ -396,7 +396,11 @@ def start_stage(stage_id, stage, dic, lesson_file, progress, exercises):
       break
 
 def unlock_points(stage_id):
-  return (stage_id - 0) * 85
+  return 85
+def is_unlocked(exercises, progress, i):
+    nr_exercises = len([name[0] for name in exercises])
+    return i == 0 or (progress.has_key(str(i)) and progress[str(i)][str(nr_exercises - 1)] >= 85)
+
 
 def enter_lesson(lesson_file):
   # load progress
@@ -443,7 +447,8 @@ def enter_lesson(lesson_file):
         prog = bcolors.BLUE + str(prog) + '%' + bcolors.ENDC
       else:
         prog = bcolors.RED + str(prog) + '%' + bcolors.ENDC
-      if total >= unlock_points(i):
+
+      if is_unlocked(exercises, progress, i):
         if is_arabic(dic[stages[i][0]][1]):
           text = "%-5s %s %-10.20s " % (str(i) + ':', prog, (dic[stages[i][1] - 1][1] + ' <- ' + dic[stages[i][0] ][1]))
         else:
@@ -459,7 +464,7 @@ def enter_lesson(lesson_file):
     print_devider()
     (index, action, quit) = handle_input(index, len(stages))
     if action:
-      if total >= unlock_points(index):
+      if is_unlocked(exercises, progress, index):
         if not progress.has_key(str(index)):
           progress[str(index)] = {}
 
