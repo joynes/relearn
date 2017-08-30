@@ -268,7 +268,7 @@ def start_write(bigdict, time, index, print_answer):
       print
       print 'vocals: alt-a = a   alt-u = u   alt-i = i    alt-o = o' 
       print 'variants: shift-i = ـى (ā / á / ỳ)    shift-o = ـة (t / h / ẗ)'
-      print 'hamza (ء): * = أ  alt-1 = إ'
+      print 'hamza (ء): shift-3 = أ  * = إ'
       print_devider()
     if print_answer:
       print 'Question %s = %s, write %s below: ' % (question[0], question[1], bcolors.GREEN + question[1] + bcolors.ENDC)
