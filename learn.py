@@ -399,7 +399,7 @@ def unlock_points(stage_id):
   return 85
 def is_unlocked(exercises, progress, i):
     nr_exercises = len([name[0] for name in exercises])
-    return i == 0 or (progress.has_key(str(i)) and progress[str(i)][str(nr_exercises - 1)] >= 85)
+    return i == 0 or (progress.has_key(str(i-1)) and progress[str(i-1)][str(nr_exercises - 1)] >= 85)
 
 
 def enter_lesson(lesson_file):
