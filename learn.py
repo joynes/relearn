@@ -47,19 +47,39 @@ class bcolors:
     BOLD = '\033[1m'
 
 def print_devider():
-  print '-----------------------'
+  print '----------------------------'
+
+def print_selected(text):
+  print_bold("%s %s" % (text, get_bold('<--')))
+
 def print_title(title):
   print_devider()
-  print title
+  print_bold(title.upper())
   print_devider()
+  print
+
+def print_footer(extra=None):
+  print
+  print_devider()
+  if extra:
+    print extra
+  print 's/d = up/down  a = choose  q = quit'
+  print_devider()
+
 def print_green(string):
   print '%s%s%s' % (bcolors.GREEN, string, bcolors.ENDC)
 
+def get_red(string):
+  return '%s%s%s' % (bcolors.RED, string, bcolors.ENDC)
+
 def print_red(string):
-  print '%s%s%s' % (bcolors.RED, string, bcolors.ENDC)
+  print get_red(string)
+
+def get_bold(string):
+  return '%s%s%s' % (bcolors.BOLD, string, bcolors.ENDC)
 
 def print_bold(string):
-  print '%s%s%s' % (bcolors.BOLD, string, bcolors.ENDC)
+  print get_bold(string)
 
 def clear():
   os.system('clear')
@@ -108,17 +128,17 @@ def nonBlockingRawInput(prompt='', timeout=100000):
 
 def print_menu(index, lessons):
   clear()
-  print 'Choose subject:'
-  print '---------------'
+  print_title('Choose subject:')
   dir_pos = 0
   for lesson in lessons:
     lesson_name = lesson.replace('.json', '').split('_')
     name_cap = reduce(lambda x, y: '%s %s' % (x.capitalize(), y.capitalize()), lesson_name)
     if index == dir_pos:
-      print_bold(name_cap)
+      print_selected(name_cap)
     else:
       print name_cap
     dir_pos += 1
+  print_footer()
 
 def handle_input(index, size):
     action = False
@@ -197,9 +217,7 @@ def start_guess(bigdict, questions, time):
     getch()
 
   os.system('clear')
-  print_devider()
-  print_bold('Result:')
-  print_devider()
+  print_title('Result:')
   print
   percentage = int(100.0 * float(correct_answ) / float(len(bigdict)))
   print 'Score: %s/%s (%s%%)' % (correct_answ, len(bigdict), percentage)
@@ -216,17 +234,16 @@ def start_sub_stage_write(questions, exercises):
   index = 0
   while True:
     os.system('clear')
-    print_devider()
-    print stage_name
-    print_devider()
+    print_title(stage_name)
     i = 0
     for choice in choices:
-      text = '%s (%s sec)' % (choice, str(exercises[1][i][TIME_INDEX]))
+      text = '%-10.10s (%s sec)' % (choice, str(exercises[1][i][TIME_INDEX]))
       if i == index:
-        print_bold(text)
+        print_selected(text)
       else:
         print text
       i = i + 1
+    print_footer()
     (index, action, quit) = handle_input(index, len(choices))
     if action:
 
@@ -255,9 +272,7 @@ def start_write(bigdict, time, index, print_answer):
   correct_answ = 0
   for question in bigdict:
     clear()
-    print_devider()
-    print 'Write The Correct Answer'
-    print_devider()
+    print_title('Write The Correct Answer')
     if is_arabic(question[1]):
       print 'Choose Arabic keyboard!!!'
       print 'LAYOUT:'
@@ -267,7 +282,7 @@ def start_write(bigdict, time, index, print_answer):
       print '     z=ز  x=خ  c=ص  v=ذ  b=ب  n=ن  m=م'
       print
       print 'vocals: alt-a = a   alt-u = u   alt-i = i    alt-o = o' 
-      print 'variants: shift-i = ـى (ā / á / ỳ)    shift-o = ـة (t / h / ẗ)'
+      print 'variants: shift-i = ـى (alif maqsura)    shift-o = ـة (t / h / ẗ)'
       print 'hamza (ء): shift-3 = أ  * = إ'
       print_devider()
     if print_answer:
@@ -284,12 +299,8 @@ def start_write(bigdict, time, index, print_answer):
       print_red('Wrong! Should be: %s' % question[1])
     raw_input('Press enter to continue')
   clear()
-  print_devider()
   os.system('clear')
-  print_devider()
-  print_bold('Result:')
-  print_devider()
-  print
+  print_title('Result:')
   percentage = int(100.0 * float(correct_answ) / float(len(bigdict)))
   print 'Score: %s/%s (%s%%)' % (correct_answ, len(bigdict), percentage)
   getch()
@@ -307,17 +318,16 @@ def start_sub_stage(questions, exercises):
   index = 0
   while True:
     os.system('clear')
-    print_devider()
-    print stage_name
-    print_devider()
+    print_title(stage_name)
     i = 0
     for choice in choices:
-      text = '%s (%s sec)' % (choice, str(exercises[1][i][TIME_INDEX]))
+      text = '%-10.10s (%s sec)' % (choice, str(exercises[1][i][TIME_INDEX]))
       if i == index:
-        print_bold(text)
+        print_selected(text)
       else:
         print text
       i = i + 1
+    print_footer()
     (index, action, quit) = handle_input(index, len(choices))
     if action:
       bigdict = []
@@ -342,9 +352,7 @@ def start_stage(stage_id, stage, dic, lesson_file, progress, exercises):
   index = 0
   while True:
     os.system('clear')
-    print_devider()
-    print "Stage: " + str(stage_id)
-    print_devider()
+    print_title("Stage: " + str(stage_id))
     i = 0
     for choice in choices:
       prog = ''
@@ -352,15 +360,16 @@ def start_stage(stage_id, stage, dic, lesson_file, progress, exercises):
       if i != 0 and not progress[str(stage_id)].has_key(str(i)):
         progress[str(stage_id)][str(i)] = 0
       if i != 0:
-        prog = '(%s%%)' % progress[str(stage_id)][str(i)]
+        prog = '(%s)' % print_percentage(progress[str(stage_id)][str(i)])
       if i >= 2:
         locked = "Locked" if progress[str(stage_id)][str(i-1)] < 85 else ""
-      text = '%s %s %s' % (choice, prog, locked)
+      text = '%-15.15s %s %s' % (choice, prog, locked)
       if i == index:
-        print_bold(text)
+        print_selected(text)
       else:
         print text
       i = i+1
+    print_footer()
 
     (index, action, quit) = handle_input(index, len(choices))
     if action:
@@ -395,12 +404,18 @@ def start_stage(stage_id, stage, dic, lesson_file, progress, exercises):
     if quit:
       break
 
-def unlock_points(stage_id):
-  return 85
 def is_unlocked(exercises, progress, i):
     nr_exercises = len([name[0] for name in exercises])
     return i == 0 or (progress.has_key(str(i-1)) and progress[str(i-1)][str(nr_exercises - 1)] >= 85)
 
+def print_percentage(prog):
+    if prog > 85:
+      prog = bcolors.GREEN + str(prog) + '%' + bcolors.ENDC
+    elif prog > 50:
+      prog = bcolors.BLUE + str(prog) + '%' + bcolors.ENDC
+    else:
+      prog = bcolors.RED + str(prog) + '%' + bcolors.ENDC
+    return prog
 
 def enter_lesson(lesson_file):
   # load progress
@@ -431,7 +446,7 @@ def enter_lesson(lesson_file):
       start_stage(0, stages[0], dic, lesson_file, exercises)
   while True:
     os.system('clear')
-    print 'Lesson: %s' % lesson_file
+    print_title('Lesson: %s' % lesson_file)
     total = 0
     for i in range(len(stages)):
       prog = 0
@@ -441,12 +456,7 @@ def enter_lesson(lesson_file):
         total += prog
       except:
         pass
-      if prog > 85:
-        prog = bcolors.GREEN + str(prog) + '%' + bcolors.ENDC
-      elif prog > 50:
-        prog = bcolors.BLUE + str(prog) + '%' + bcolors.ENDC
-      else:
-        prog = bcolors.RED + str(prog) + '%' + bcolors.ENDC
+      prog = print_percentage(prog)
 
       if is_unlocked(exercises, progress, i):
         if is_arabic(dic[stages[i][0]][1]):
@@ -454,14 +464,13 @@ def enter_lesson(lesson_file):
         else:
           text = "%-10.10s %-10.20s  %s" % (str(i) + ':', (dic[stages[i][0]][1] + ' -> ' + dic[stages[i][1] - 1][1]), prog)
       else:
-        text = "%-10.10s %-10.10s (%s points needed)" % (str(i) + ':', 'Locked!', (unlock_points(i) - total))
+        text = "%-10.10s %s" % (str(i) + ':', get_red('Locked'))
       if i == index:
-        print_bold(text)
+        print_selected(text)
       else:
         print text
-    print_devider()
-    print_bold('Total: %s points' % total)
-    print_devider()
+    print
+    print_footer('Total: %s points' % total)
     (index, action, quit) = handle_input(index, len(stages))
     if action:
       if is_unlocked(exercises, progress, index):
