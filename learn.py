@@ -19,15 +19,15 @@ import termios
 import tty
 from os.path import join, isfile, expanduser
 
+def get_sound_path(name):
+  return join('data', name + '.m4a')
+
 def play_sound(fil):
-  try:
-    os.system('afplay data/' + fil[0] + '.m4a')
-  except:
-    # try play the answaer
-    try:
-      os.system('afplay data/' + fil[1] + '.m4a')
-    except:
-      pass
+  path = 'data'
+  if isfile(get_sound_path(fil[0])):
+      os.system('afplay %s &' % get_sound_path(fil[0]))
+  elif isfile(get_sound_path(fil[1])):
+      os.system('afplay %s &' % get_sound_path(fil[1]))
 
 def savepath():
   return join(expanduser('~'), '.learn')
@@ -95,8 +95,12 @@ def getch():
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
     return ch
+
 class AlarmException(Exception):
-    pass
+  pass
+
+class QuitException(Exception):
+  pass
 
 def alarmHandler(signum, frame):
     raise AlarmException
@@ -185,7 +189,7 @@ def question(word, dictionary, sec):
     elif inp == 'd':
         svar = alt[2]
     elif inp == 'q':
-      raise Exception('quit')
+      raise QuitException()
 
     if is_arabic(alt[0]):
       print 'is arabic'
@@ -210,7 +214,7 @@ def start_guess(bigdict, questions, time):
       if question(word, questions, time):
         correct_answ += 1
       play_sound(word)
-    except:
+    except QuitException:
       return 0
     print
     print 'Press a button to continue'
