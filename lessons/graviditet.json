@@ -1,0 +1,30 @@
+{
+  "exercises": [
+    ["Write", [["Training", 3, 1000], ["Training", 4, 20], ["Practice", 4, 30], ["Exam", 2, 20]]]
+  ],
+  "words": [ 
+    ["stress ska bli", "lugn"],
+    ["rädsla ska bli", "trygg"],
+    ["Viktiga gravidietstecken förkortas som", "RATA"],
+    ["Föda utan rädsla skrivs som", "FUR"],
+    ["Avslappningsområden skrivs som", "PHARL"],
+    ["stresshormoner", "adrenalin, kortisol"],
+    ["lugnhetshormon", "oxytocin"],
+    ["Tecken 1:", "Röst"],
+    ["Tecken 2:", "Andning"],
+    ["Tecken 3:", "tankens kraft"],
+    ["Tecken 4:", "Avspänning"],
+    ["Om inga verktyg hjälper så börja med", "ögonkontakt"],
+    ["Avslappning 1", "Panna"],
+    ["Avslappning 2", "haka"],
+    ["Avslappning 3", "axlar"],
+    ["Avslappning 4", "rumpa"],
+    ["Avslappning 5", "lår"],
+    ["Position 1", "knä mot stolsits"],
+    ["Position 2", "stå mot stolkant"],
+    ["Position 3", "bröst mot partner"],
+    ["Position 4", "rygg mot partner"],
+    ["Massageriktning", "ner"]
+   
+  ]
+}
