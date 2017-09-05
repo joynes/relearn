@@ -10,12 +10,12 @@
     ["Avslappningsområden skrivs som", "PHARL"],
     ["stresshormoner", "adrenalin, kortisol"],
     ["lugnhetshormon", "oxytocin"],
-    ["Tecken 1:", "Röst"],
-    ["Tecken 2:", "Andning"],
+    ["Tecken 1:", "röst"],
+    ["Tecken 2:", "andning"],
     ["Tecken 3:", "tankens kraft"],
-    ["Tecken 4:", "Avspänning"],
+    ["Tecken 4:", "avspänning"],
     ["Om inga verktyg hjälper så börja med", "ögonkontakt"],
-    ["Avslappning 1", "Panna"],
+    ["Avslappning 1", "panna"],
     ["Avslappning 2", "haka"],
     ["Avslappning 3", "axlar"],
     ["Avslappning 4", "rumpa"],
@@ -34,6 +34,6 @@
     ["Säger kvinna när verkarna börjar", "nu"],
     ["Gör kvinnan när verkarna är slut", "suckar"],
     ["Latensfas kan halla vara i", "2 dygn"],
-    ["Hur långt ska man öppna sig innan sjukhuset", "4 cm"]
+    ["Hur långt ska man öppna sig innan sjukhuset", "4 cm"]]
   ]
 }
