@@ -24,7 +24,16 @@
     ["Position 2", "stå mot stolkant"],
     ["Position 3", "bröst mot partner"],
     ["Position 4", "rygg mot partner"],
-    ["Massageriktning", "ner"]
-   
+    ["Massageriktning [upp, ner]", "ner"],
+    ["Röst ska vara [pipig, mörk]", "mörk"],
+    ["Partner ska prata [snabbt, sakta]", "sakta"],
+    ["Partner ska prata [upprepande, varierat]", "upprepande"],
+    ["Tecken om kvinnan stör sig på partner", "räcka upp hand"],
+    ["Tunnelseende beror på", "stress"],
+    ["Värkar håller x-y antal sekunder", "30-60"],
+    ["Säger kvinna när verkarna börjar", "nu"],
+    ["Gör kvinnan när verkarna är slut", "suckar"],
+    ["Latensfas kan halla vara i", "2 dygn"],
+    ["Hur långt ska man öppna sig innan sjukhuset", "4 cm"]
   ]
 }

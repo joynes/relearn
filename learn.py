@@ -410,7 +410,7 @@ def start_stage(stage_id, stage, dic, lesson_file, progress, exercises):
 
 def is_unlocked(exercises, progress, i):
     nr_exercises = len([name[0] for name in exercises])
-    return i == 0 or (progress.has_key(str(i-1)) and progress[str(i-1)][str(nr_exercises - 1)] >= 85)
+    return i == 0 or (progress.has_key(str(i-1)) and progress[str(i-1)][str(nr_exercises)] >= 85)
 
 def print_percentage(prog):
     if prog > 85:
