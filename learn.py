@@ -8,6 +8,7 @@ ITERATIONS = 3
 WRITE_ITERATIONS = 1
 ITERATION_INDEX = 1
 TIME_INDEX = 2
+LESSON_SIZE = 6
 
 import json
 import os
@@ -136,7 +137,10 @@ def print_menu(index, lessons):
   dir_pos = 0
   for lesson in lessons:
     lesson_name = lesson.replace('.json', '').split('_')
-    name_cap = reduce(lambda x, y: '%s %s' % (x.capitalize(), y.capitalize()), lesson_name)
+    name_cap = ''
+    for lesson_word in lesson_name:
+      name_cap = name_cap + lesson_word.capitalize() + ' '
+
     if index == dir_pos:
       print_selected(name_cap)
     else:
@@ -434,16 +438,15 @@ def enter_lesson(lesson_file):
     lesson = json.loads(fdlesson.read())
   dic = lesson["words"]
   exercises = lesson["exercises"]
-  lesson_size = 6
   multiplier = 5
   stages = []
-  for i in range(0, len(dic) / lesson_size):
-    start = i * lesson_size
-    end = (i + 1) * lesson_size
+  for i in range(0, (len(dic) / LESSON_SIZE) + 1):
+    start = i * LESSON_SIZE
+    end = min((i + 1) * LESSON_SIZE, len(dic))
     stages.append((start, end))
     back = i 
     while back > 0:
-      stages.append((back*lesson_size - lesson_size, end))
+      stages.append((back*LESSON_SIZE - LESSON_SIZE, end))
       back -= 1
     
   if test:
