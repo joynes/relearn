@@ -4,6 +4,7 @@
     ["Guess", [["Training", 3, 1000], ["Practice", 3, 5], ["Exam", 3, 3]]],
     ["Write", [["Training", 3, 1000], ["Training", 4, 20], ["Practice", 4, 30], ["Exam", 2, 20]]]
   ],
+  "size": 6,
   "words": [ 
     ["Visa filer i mapp", "ls"],
     ["Gå in i mapp", "cd"],

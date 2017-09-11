@@ -8,7 +8,6 @@ ITERATIONS = 3
 WRITE_ITERATIONS = 1
 ITERATION_INDEX = 1
 TIME_INDEX = 2
-LESSON_SIZE = 6
 
 import json
 import os
@@ -438,6 +437,7 @@ def enter_lesson(lesson_file):
     lesson = json.loads(fdlesson.read())
   dic = lesson["words"]
   exercises = lesson["exercises"]
+  LESSON_SIZE = lesson["size"]
   multiplier = 5
   stages = []
   for i in range(0, (len(dic) / LESSON_SIZE) + 1):
