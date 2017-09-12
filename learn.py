@@ -455,7 +455,7 @@ def enter_lesson(lesson_file):
     os.system('clear')
     print_title('Lesson: %s' % lesson_file)
     total = 0
-    for i in range(len(stages)):
+    for i in range(min(len(stages), 15)):
       prog = 0
       try:
         stage_total = reduce(lambda x, y: x+y, progress[str(i)].values())
