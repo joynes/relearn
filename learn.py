@@ -440,7 +440,8 @@ def enter_lesson(lesson_file):
   LESSON_SIZE = lesson["size"]
   multiplier = 5
   stages = []
-  for i in range(0, (len(dic) / LESSON_SIZE) + 1):
+  extra_uneven = 1 if (len(dic) % LESSON_SIZE) != 0 else 0
+  for i in range(0, (len(dic) / LESSON_SIZE) + extra_uneven):
     start = i * LESSON_SIZE
     end = min((i + 1) * LESSON_SIZE, len(dic))
     stages.append((start, end))
