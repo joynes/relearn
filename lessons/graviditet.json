@@ -1,6 +1,6 @@
 {
   "exercises": [
-    ["Write", [["Training", 3, 1000], ["Training", 4, 20], ["Practice", 4, 30], ["Exam", 2, 20]]]
+    ["Write", [["Training", 3, 1000], ["Training", 4, 20], ["Practice", 4, 20], ["Exam", 2, 10]]]
   ],
   "size": 10,
   "words": [ 
@@ -10,7 +10,7 @@
     ["T i TRAS", "tanke"],
     ["R i TRAS", "röst"],
     ["A i TRAS", "andning"],
-    ["S i TRAS", "spanning"],
+    ["S i TRAS", "spänning"],
     ["Förkortning: Stresshormoner", "SA"],
     ["S i SA", "kortisol"],
     ["A i SA", "adrenalin"],
