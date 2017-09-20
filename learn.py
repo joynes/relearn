@@ -299,7 +299,7 @@ def start_write(bigdict, time, index, print_answer):
     text = raw_input_timed('-> ', time)
     if text == 'q':
       return 0
-    elif text == question[1].encode('utf-8') :
+    elif text.lower() == question[1].encode('utf-8').lower():
       print_green('Correct answer!')
       correct_answ += 1
     else:
