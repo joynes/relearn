@@ -1,0 +1,31 @@
+{
+  "exercises": [
+    ["Write", [["Training", 3, 1000], ["Training", 4, 20], ["Practice", 4, 20], ["Exam", 2, 10]]]
+  ],
+  "size": 10,
+  "words": [ 
+    ["Latensperiod", "8h"],
+    ["Aktiv period", "6h"],
+    ["Hur långt efter beräknat datum föder man oftast", "5 dagar"],
+    ["Förkortning, Smartlindring", "Kuba al tema"],
+    ["Ku i Kuba al tema", "Kudde"],
+    ["Ba i Kuba al tema", "Bad"],
+    ["Al i Kuba al tema", "Alvedon"],
+    ["Te i Kuba al tema", "TENSE"],
+    ["Ma i Kuba al tema", "Massage"],
+    ["Förkortning, Smärtlinding pa sjukhus", "Lekap"],
+    ["L i LEKAP", "Lustgas"],
+    ["E i LEKAP", "Epidural"],
+    ["K i LEKAP", "Kvaddlar"],
+    ["A i LEKAP", "Akupunktur"],
+    ["P i LEKAP", "PDB"],
+    ["Övervakningsapparat för foster", "CTG"],
+    ["Telefonnr SOS", "08 616 26 80"],
+    ["Chans att vattnet går", "25%"],
+    ["Förkortning CTG", "Cardiotacography"],
+    ["Hur öppen är man när man föder", "10 cm"],
+    ["Bindvävstäckta luckor i nyföddas kranium", "fontaneller"],
+    ["Efter hur lång tid klipper man navelsträn", "3-7m"],
+    ["Barn får poäng mellan", "0-10"]
+  ]
+}
