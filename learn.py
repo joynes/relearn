@@ -195,7 +195,6 @@ def question(word, dictionary, sec):
       raise QuitException()
 
     if is_arabic(alt[0]):
-      print 'is arabic'
       if inp == 'a':
         svar = alt[2]
       elif inp == 'd':
@@ -299,7 +298,7 @@ def start_write(bigdict, time, index, print_answer):
     text = raw_input_timed('-> ', time)
     if text == 'q':
       return 0
-    elif text.lower() == question[1].encode('utf-8').lower():
+    elif text.lower().replace(' ', '') == question[1].encode('utf-8').lower().replace(' ', ''):
       print_green('Correct answer!')
       correct_answ += 1
     else:
