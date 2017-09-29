@@ -303,6 +303,7 @@ def start_write(bigdict, time, index, print_answer):
       correct_answ += 1
     else:
       print_red('Wrong! Should be: %s' % question[1])
+    play_sound(question)
     raw_input('Press enter to continue')
   clear()
   os.system('clear')
