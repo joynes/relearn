@@ -10,6 +10,7 @@ ITERATION_INDEX = 1
 TIME_INDEX = 2
 
 import json
+import operator
 import os
 import re
 import random
@@ -34,6 +35,10 @@ def savepath():
 
 def savefile(lesson_file):
   sfile = re.sub(r'(.*/)(.*).json', r'.\1\2_progress.json', lesson_file).replace('/', '_')
+  return join(savepath(), sfile)
+
+def wrongfile(lesson_file):
+  sfile = re.sub(r'(.*/)(.*).json', r'.\1\2_wrong.json', lesson_file).replace('/', '_')
   return join(savepath(), sfile)
 
 
@@ -148,15 +153,15 @@ def print_menu(index, lessons):
   print_footer()
 
 def handle_input(index, size):
-    action = False
+    action = None
     quit = False
     input = getch()
     if input == 'd':
       index += 1
     elif input == 's':
       index -= 1
-    elif input == 'a':
-      action = True
+    elif input in 'ae':
+      action = input
     elif input == 'q':
       quit = True
     if index >= size:
@@ -168,7 +173,7 @@ def handle_input(index, size):
 def is_arabic(word):
     return ord(word[0]) > 0x600 and ord(word[0]) < 0x6FF
 
-def question(word, dictionary, sec):
+def question(word, dictionary, sec, lesson_file):
     
     alt = []
     for entry in dictionary:
@@ -207,13 +212,14 @@ def question(word, dictionary, sec):
         print
         print_red('Wrong! Should be: %s' % word[0])
         answer = False
+        save_wrong_answers(lesson_file, word[0])
     return answer
 
-def start_guess(bigdict, questions, time):
+def start_guess(bigdict, questions, time, lesson_file):
   correct_answ = 0
   for word in bigdict:
     try:
-      if question(word, questions, time):
+      if question(word, questions, time, lesson_file):
         correct_answ += 1
       play_sound(word)
     except QuitException:
@@ -230,7 +236,7 @@ def start_guess(bigdict, questions, time):
   getch()
   return percentage
 
-def start_sub_stage_write(questions, exercises):
+def start_sub_stage_write(questions, exercises, lesson_file):
   stage_name = exercises[0]
   choices = [i[0] for i in exercises[1]]
 
@@ -263,7 +269,7 @@ def start_sub_stage_write(questions, exercises):
         random.shuffle(iteration)
         bigdict += iteration
 
-      percentage = start_write(bigdict, exercises[1][index][TIME_INDEX], index, "Training" in choices[index] )
+      percentage = start_write(bigdict, exercises[1][index][TIME_INDEX], index, "Training" in choices[index], lesson_file)
         # only set percentage if its the exam
       if index != len(choices) - 1:
         percentage = 0
@@ -274,7 +280,7 @@ def start_sub_stage_write(questions, exercises):
 
   return percentage
 
-def start_write(bigdict, time, index, print_answer):
+def start_write(bigdict, time, index, print_answer, lesson_file):
   correct_answ = 0
   for question in bigdict:
     clear()
@@ -295,7 +301,9 @@ def start_write(bigdict, time, index, print_answer):
       print 'Question %s = %s, write %s below: ' % (question[0], question[1], bcolors.GREEN + question[1] + bcolors.ENDC)
     else:
       print 'Question (write answer): ' + question[0]
+    print bcolors.BLUE
     text = raw_input_timed('-> ', time)
+    print bcolors.ENDC
     if text == 'q':
       return 0
     elif text.lower().replace(' ', '') == question[1].encode('utf-8').lower().replace(' ', ''):
@@ -303,6 +311,8 @@ def start_write(bigdict, time, index, print_answer):
       correct_answ += 1
     else:
       print_red('Wrong! Should be: %s' % question[1])
+      save_wrong_answers(lesson_file, question[1])
+
     play_sound(question)
     raw_input('Press enter to continue')
   clear()
@@ -315,7 +325,7 @@ def start_write(bigdict, time, index, print_answer):
     raw_input('Change to NON arabic keyboard and press enter!')
   return percentage
 
-def start_sub_stage(questions, exercises):
+def start_sub_stage(questions, exercises, lesson_file):
   stage_name = exercises[0]
   choices = [i[0] for i in exercises[1]]
 
@@ -343,7 +353,7 @@ def start_sub_stage(questions, exercises):
         random.shuffle(iteration)
         bigdict += iteration
 
-      percentage = start_guess(bigdict, questions, exercises[1][index][TIME_INDEX])
+      percentage = start_guess(bigdict, questions, exercises[1][index][TIME_INDEX], lesson_file)
         # only set percentage if its the exam
       if index != len(choices) - 1:
         percentage = 0
@@ -392,9 +402,9 @@ def start_stage(stage_id, stage, dic, lesson_file, progress, exercises):
       else:
         if index < 2 or progress[str(stage_id)][str(index-1)] > 85:
           if 'Write' in choices[index]:
-            percentage = start_sub_stage_write(questions, exercises[index-1])
+            percentage = start_sub_stage_write(questions, exercises[index-1], lesson_file)
           else:
-            percentage = start_sub_stage(questions, exercises[index-1])
+            percentage = start_sub_stage(questions, exercises[index-1], lesson_file)
 
           if not progress[str(stage_id)].has_key(str(index)):
             progress[str(stage_id)][str(index)] = 0
@@ -424,12 +434,36 @@ def print_percentage(prog):
       prog = bcolors.RED + str(prog) + '%' + bcolors.ENDC
     return prog
 
+def load_wrong_answers(lesson_file):
+
+  # load wrong answers
+  if isfile(wrongfile(lesson_file)):
+    with open(wrongfile(lesson_file), 'r') as fd:
+        wrong_answers = json.loads(fd.read())
+  else:
+    wrong_answers = {}
+    with open(wrongfile(lesson_file), 'w+') as fd:
+      fd.write(json.dumps(wrong_answers))
+      fd.flush()
+  return wrong_answers
+
+def save_wrong_answers(lesson_file, word):
+  with open(wrongfile(lesson_file), 'r') as fd:
+    wrong_answers = json.loads(fd.read())
+  with open(wrongfile(lesson_file), 'w+') as fd:
+    if not word in wrong_answers:
+      wrong_answers[word] = 1
+    else:
+      wrong_answers[word] += 1
+    fd.write(json.dumps(wrong_answers))
+    fd.flush()
+
 def enter_lesson(lesson_file):
   # load progress
-  try:
+  if isfile(savefile(lesson_file)):
     with open(savefile(lesson_file), 'r') as fd:
         progress = json.loads(fd.read())
-  except IOError:
+  else:
     progress = {}
   clear()
   index = 0
@@ -453,6 +487,7 @@ def enter_lesson(lesson_file):
   if test:
       start_stage(0, stages[0], dic, lesson_file, exercises)
   while True:
+    wrong_answers = load_wrong_answers(lesson_file)
     os.system('clear')
     print_title('Lesson: %s' % lesson_file)
     total = 0
@@ -478,9 +513,17 @@ def enter_lesson(lesson_file):
       else:
         print text
     print
+    print '%-5s Display wrong answers' % 'e:'
     print_footer('Total: %s points' % total)
     (index, action, quit) = handle_input(index, len(stages))
-    if action:
+    if action == 'e':
+      sorted_wrong = sorted(wrong_answers.items(), key=operator.itemgetter(1))
+      clear()
+      print 'Top words you have problems with'
+      for wrong in sorted_wrong:
+        print u"{}: {}".format(wrong[1], wrong[0])
+      getch()
+    elif action:
       if is_unlocked(exercises, progress, index):
         if not progress.has_key(str(index)):
           progress[str(index)] = {}
