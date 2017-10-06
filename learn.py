@@ -293,7 +293,7 @@ def start_write(bigdict, time, index, print_answer, lesson_file):
       print '   a=ا  s=س  d=د  f=ف  g=غ  h=ح  j=ج  k=ك  l=ل' 
       print '     z=ز  x=خ  c=ص  v=ذ  b=ب  n=ن  m=م'
       print
-      print 'vocals: alt-a = a   alt-u = u   alt-i = i    alt-o = o' 
+      print 'vocals: alt-a = a   alt-u = u   alt-i = i'
       print 'variants: shift-i = ـى (alif maqsura)    shift-o = ـة (t / h / ẗ)'
       print 'hamza (ء): shift-3 = أ  * = إ'
       print_devider()
