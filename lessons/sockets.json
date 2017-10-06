@@ -1,0 +1,19 @@
+{
+  "exercises": [
+    ["Write", [["Training", 100, 1000], ["Practice", 3, 20], ["Exam", 3, 6]]]
+  ],
+  "size":10,
+  "words": [ 
+    ["f main", "int main(int argc, char **argv)"],
+    ["t Internet address", "sockaddr_in sin_family,sin_port"],
+    ["f socket", "int socket(int domain, int type, int protocol) <0"],
+    ["i socket", "sys/socket.h"],
+    ["c domain internet v4", "AF_INET"],
+    ["c type tcp", "SOCK_STREAM"],
+    ["f write zeroes to byte string", "void bzero(void *s, size_t n)"],
+    ["f convert port to network", "uint16_t htons(uint_16_t hostshort)"],
+    ["i conversions to network", "arpa/inet.h"],
+    ["f convert ip to network", "int inet_pton(int af, const char * restrict src, void * restrict dst)"],
+    ["f connection on socket", "int connect(int socket, const struct sockaddr *address, socklen_t, address_len) <0"]
+    ]
+}
